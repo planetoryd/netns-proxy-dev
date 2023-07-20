@@ -1,0 +1,23 @@
+[submodule "rustables"]
+	path = rustables
+	url = https://github.com/planetoryd/rustables
+	branch = netnsp
+[submodule "tidy-tuntap"]
+	path = tidy-tuntap
+	url = https://github.com/planetoryd/tidy-tuntap
+	branch = main
+[submodule "rtnetlink"]
+	path = rtnetlink
+	url = https://github.com/planetoryd/rtnetlink
+[submodule "netlink-packet-audit"]
+	path = netlink-packet-audit
+	url = https://github.com/planetoryd/netlink-packet-audit
+[submodule "netlink-sys"]
+	path = netlink-sys
+	url = https://github.com/planetoryd/netlink-sys
+[submodule "netlink-proto"]
+	path = netlink-proto
+	url = https://github.com/planetoryd/netlink-proto
+[submodule "netns-proxy-rs"]
+	path = netns-proxy-rs
+	url = https://github.com/planetoryd/netns-proxy-rs

@@ -1,0 +1,12 @@
+[workspace]
+resolver = "2"
+members = [
+    "netlink-sys",
+    "netlink-proto",
+    "netns-proxy-rs",
+    "rustables",
+    "netlink-packet-audit",
+    "rtnetlink",
+]
+[profile.release]
+strip = "debuginfo"
