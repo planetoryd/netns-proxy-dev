@@ -21,3 +21,6 @@
 [submodule "netns-proxy-rs"]
 	path = netns-proxy-rs
 	url = https://github.com/planetoryd/netns-proxy-rs
+[submodule "serde-error"]
+	path = serde-error
+	url = https://github.com/Ekleog/serde-error

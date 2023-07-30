@@ -6,7 +6,7 @@ members = [
     "netns-proxy-rs",
     "rustables",
     "netlink-packet-audit",
-    "rtnetlink",
+    "rtnetlink"
 ]
 [profile.release]
 strip = "debuginfo"
