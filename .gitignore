@@ -1,3 +1,9 @@
 target
 **.sock
 local/**
+secret.json
+netnsp.json
+conf.json
+.vscode
+.cargo/
+nsproxy

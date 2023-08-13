@@ -8,5 +8,9 @@ members = [
     "netlink-packet-audit",
     "rtnetlink"
 ]
+
 [profile.release]
-strip = "debuginfo"
+strip = true
+opt-level = "z" # bottleneck is size, not cpu
+lto = true
+
