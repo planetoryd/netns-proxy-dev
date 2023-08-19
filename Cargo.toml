@@ -13,4 +13,3 @@ members = [
 strip = true
 opt-level = "z" # bottleneck is size, not cpu
 lto = true
-
