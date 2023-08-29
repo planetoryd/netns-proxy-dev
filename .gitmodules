@@ -24,3 +24,9 @@
 [submodule "serde-error"]
 	path = serde-error
 	url = https://github.com/Ekleog/serde-error
+[submodule "tun2proxy"]
+	path = tun2proxy
+	url = https://github.com/blechschmidt/tun2proxy
+[submodule "fixed-map"]
+	path = fixed-map
+	url = https://github.com/planetoryd/fixed-map
