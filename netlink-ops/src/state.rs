@@ -1,10 +1,11 @@
 use anyhow::{anyhow, bail, Ok, Result};
-use clap::Id;
+
 use derivative::Derivative;
 use futures::{
     future::{MaybeDone, Ready},
     Future, FutureExt, StreamExt,
 };
+use maybe_async::{masy, masyn, maybe, msync};
 use std::{
     borrow::Cow,
     collections::{BTreeMap, BTreeSet},
@@ -33,6 +34,7 @@ pub enum Existence<A: Trans> {
     // Confirmed absencce is implied in the map
 }
 
+#[masyn]
 #[derive(Derivative)]
 #[derivative(Debug)]
 /// Maybe Lazy
@@ -41,11 +43,20 @@ pub enum LazyVal<'f, V> {
     Done(V),
 }
 
+#[msync]
+#[derive(Derivative)]
+#[derivative(Debug)]
+pub enum LazyVal<'f, V> {
+    Todo(#[derivative(Debug = "ignore")] Pin<Box<dyn Fn() -> Result<V> + 'f + Send>>),
+    Done(V),
+}
+
+#[maybe]
 impl<'f, V> LazyVal<'f, V> {
     pub async fn eval(&mut self) -> Result<()> {
         match self {
             Self::Todo(f) => {
-                let k = f.await?;
+                let k = masy!({f()?}{f.await?});
                 *self = Self::Done(k);
                 Ok(())
             }
@@ -74,6 +85,7 @@ pub enum LExistence<'f, A: Trans> {
     ExpectAbsent,
 }
 
+#[maybe]
 impl<'f, A: Trans> LExistence<'f, A> {
     pub async fn eval(&mut self) -> Result<()> {
         match self {
@@ -172,6 +184,7 @@ impl<M: TransMap> Trans for M {
     }
 }
 
+#[maybe]
 impl<A: Trans> Existence<A> {
     /// Errors of assumption doesn't hold
     pub fn exist(self) -> Result<A> {
@@ -379,6 +392,7 @@ impl<K: Hash + Debug + Clone + Eq + Key, V> ExistenceMap<K> for Map<K, V> {
     }
 }
 
+#[maybe]
 pub trait EMapExt<K: Debug + Clone, A: Trans>: ExistenceMap<K, V = Existence<A>> {
     /// From any to non-absent
     async fn trans_to<'f>(&mut self, key: &K, v: LExistence<'f, A>) -> Result<Option<Self::V>> {
@@ -453,6 +467,7 @@ pub trait DependentEMap<
     }
 }
 
+#[maybe]
 /// Extended for Existence<A>
 pub trait DepedentEMapE<
     K: Debug + Clone + Ord,
@@ -554,7 +569,7 @@ impl<C: Default> ExpCollection<C> {
             Self::Unknown => {
                 *self = Self::Filled(Default::default());
                 self.to_filled()
-            },
+            }
         }
     }
     pub fn filled(&mut self) -> Result<&mut C> {

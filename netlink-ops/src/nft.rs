@@ -1,4 +1,6 @@
-use maybe_async::{asyn, sync, maybe_async, maybe};
+#![allow(non_snake_case)]
+
+use maybe_async::{masy, masyn, maybe, msync};
 use rtnetlink::netlink_sys::{AsyncSocket, Socket, TokioSocket};
 use rustables::{
     expr::{
@@ -292,9 +294,13 @@ impl Subbed for PTable {
     fn sub_props(&self) -> Result<Self::SPIter<'_>> {
         Ok(self.chains.values())
     }
-    #[maybe]
+    #[masyn]
     async fn sub_objs_existing<S: AsyncSocket>(&self, sock: &mut S) -> Result<Self::STIter> {
         Ok(list_chains_for_table_async(&self.table, sock).await?)
+    }
+    #[msync]
+    fn sub_objs_existing(&self, sock: &mut Socket) -> Result<Self::STIter> {
+        Ok(list_chains_for_table(&self.table, sock)?)
     }
     fn exclusive() -> bool {
         true
@@ -317,7 +323,8 @@ impl Subbed for PChain {
     }
     #[maybe(fn sub_objs_existing(&self, sock: &mut Socket) -> Result<Self::STIter>)]
     async fn sub_objs_existing<S: AsyncSocket>(&self, sock: &mut S) -> Result<Self::STIter> {
-        Ok(list_rules_for_chain_async(&self.chain, sock).await?)
+        Ok(masy!({list_rules_for_chain(&self.chain, sock)?}
+            {list_rules_for_chain_async(&self.chain, sock).await?}))
     }
     fn sub_props(&self) -> Result<Self::SPIter<'_>> {
         Ok(&self.rules)
@@ -331,8 +338,9 @@ impl Concrete for Rule {
     }
 }
 
+#[maybe]
 pub async fn print_all() -> Result<()> {
-    let mut sock = TokioSocket::new(rtnetlink::netlink_sys::constants::NETLINK_NETFILTER)?;
+    let mut sock = masy!({rustables::util::new_socket()?} {TokioSocket::new(rtnetlink::netlink_sys::constants::NETLINK_NETFILTER)?});
     let nf = NftState::fetch((), &mut sock).await?;
     dbg!(nf);
     Ok(())
@@ -411,7 +419,9 @@ impl NftState {
     pub async fn apply<S: AsyncSocket>(&self, sock: &mut S) -> Result<()> {
         let mut b = Batch::new();
         self.compose(&mut b, sock).await?;
-        b.send_async(sock).await?;
+        masy!({b.send(sock)}{
+            b.send_async(sock).await?;
+        })?;
         Ok(())
     }
 }

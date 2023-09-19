@@ -1,12 +1,12 @@
 use std::{
     os::fd::AsRawFd,
     path::{Path, PathBuf},
-    sync::Arc, ops::Deref,
+    sync::Arc, ops::Deref, fmt::Display,
 };
 
 use anyhow::bail;
 use derivative::Derivative;
-use maybe_async::{asyn, masy, maybe, sync};
+use maybe_async::{masy, maybe};
 use nix::{fcntl::FdFlag, sched::CloneFlags};
 use rtnetlink::NetworkNamespace;
 use serde::{Deserialize, Serialize};
@@ -24,14 +24,20 @@ pub struct Netns {
 pub struct NSID {
     /// Only Inode is used as key
     pub inode: u64,
-    #[serde(skip_serializing)]
+    #[serde(skip)]
     #[serde(default)]
     #[derivative(Hash = "ignore")]
     #[derivative(PartialEq = "ignore")]
     pub path: Option<Arc<PathBuf>>,
 }
 
-pub const NETNS_PATH: &Path = Path::new("/run/netns");
+impl Display for NSID {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!("[NS{}]", self.inode))
+    }
+}
+
+pub const NETNS_PATH: &str = "/run/netns";
 
 pub mod flags {
     use bitflags::bitflags;
@@ -90,7 +96,7 @@ impl NSIDFrom {
     }
     pub fn path(&self) -> PathBuf {
         match &self {
-            NSIDFrom::Named(p) => NETNS_PATH.join(p),
+            NSIDFrom::Named(p) => Path::new(NETNS_PATH).join(p),
             NSIDFrom::Pid(p) => PathBuf::from(format!("/proc/{}/ns/net", p.0)),
             NSIDFrom::Path(path) => path.to_owned(),
             NSIDFrom::Root => {

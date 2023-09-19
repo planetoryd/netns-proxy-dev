@@ -8,7 +8,7 @@ use fixed_map::{Key, Map};
 use futures::{future::Ready, Future, FutureExt, SinkExt, StreamExt, TryFutureExt};
 use ipnetwork::IpNetwork;
 
-use maybe_async::maybe;
+use maybe_async::{maybe, masy};
 use serde::{Deserialize, Serialize};
 use tokio::{
     io::AsyncWriteExt,
@@ -97,6 +97,7 @@ pub struct NLTracked {
     handle: Arc<NLHandle>,
 }
 
+#[maybe]
 impl NLTracked {
     #[inline]
     pub fn h(&self) -> &NLHandle {
@@ -304,8 +305,8 @@ impl NLStateful {
     }
 }
 
+#[maybe]
 impl NLStateful {
-    #[maybe]
     /// retrieves the list of links and info for ns
     pub async fn new(netlink: NLTracked) -> Result<NLStateful> {
         let nsnl = NLStateful {
@@ -319,7 +320,6 @@ impl NLStateful {
 
         Ok(nsnl)
     }
-    #[maybe]
     pub async fn fill(&mut self) -> Result<()> {
         let netlink = self.conn.h();
         let mut links = netlink.handle.link().get().execute();
@@ -446,13 +446,15 @@ impl NLStateful {
         let n = link
             .trans_to(
                 &name,
-                LExistence::Exist(LazyVal::Todo(Box::pin(async {
-                    let k = conn.h().get_link(name.clone()).await?;
-                    let mut la: LinkAttrs = k.into();
-                    let addrs = conn.h().get_link_addrs(la.index).await?;
-                    la.fill_addrs(addrs)?;
-                    Ok(la)
-                }))),
+                LExistence::Exist(LazyVal::Todo(Box::pin(
+                    async {
+                        let k = conn.h().get_link(name.clone()).await?;
+                        let mut la: LinkAttrs = k.into();
+                        let addrs = conn.h().get_link_addrs(la.index).await?;
+                        la.fill_addrs(addrs)?;
+                        Ok(la)
+                    },
+                ))),
             )
             .await;
         match n {
@@ -516,8 +518,9 @@ impl NLStateful {
 // so we can partially check the code before compiling
 // we get an Netns obj to perform ops on it
 // and we get a VethPair obj inside, and add addrs to it
+
+#[maybe]
 impl Netns {
-    #[maybe]
     /// enter a ns
     pub async fn enter(entry: NSID) -> Result<Netns> {
         let f = entry.open().await?;
@@ -526,7 +529,6 @@ impl Netns {
         let netlink = NLStateful::new(netlink).await?;
         Ok(Netns { id: entry, netlink })
     }
-    #[maybe]
     pub async fn thread() -> Result<Netns> {
         let id = NSIDFrom::Thread.to_id(NSCreate::empty()).await?;
         let mut netlink =
@@ -537,7 +539,6 @@ impl Netns {
     pub fn new(ns: NSID, netlink: NLStateful) -> Self {
         Self { id: ns, netlink }
     }
-    #[maybe]
     // 'x is shorter than 'a
     pub async fn refresh<'x>(&'x mut self) -> Result<()> {
         // will just rebuild that struct based on the handle
@@ -769,7 +770,7 @@ pub struct VethConn {
 impl VethConn {
     /// Adaptive application of Veth connection, accepting dirty state
     pub async fn apply<'n>(&self, subject_ns: &'n mut Netns, t_ns: &'n mut Netns) -> Result<()> {
-        let t_fd = t_ns.id.open_sync()?;
+        let t_fd = t_ns.id.open()?;
         log::info!(
             "Apply VethConn S{} -> T{}. {:?}",
             subject_ns.id,
