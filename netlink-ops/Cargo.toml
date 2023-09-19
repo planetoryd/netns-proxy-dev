@@ -1,0 +1,26 @@
+[package]
+name = "netlink-ops"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio = { version = "1.27.0", features = ["full"] }
+ipnetwork = { version = "0.20.0", features = ["serde"] }
+nix = { version = "0.26.2", features = ["user", "sched"] }
+anyhow = { version = "1.0.71", features = ["backtrace"] }
+rtnetlink = { path = "../rtnetlink" }
+tidy-tuntap = { path = "../tidy-tuntap" }
+rustables = { path = "../rustables" }
+derivative = "2.2.0"
+futures = "0.3.28"
+maybe-async = { path = "../maybe-async-rs", features = ["is_sync"] }
+serde = "1.0.188"
+bitflags = "2.4.0"
+serde_with = "3.3.0"
+async-recursion = "1.0.4"
+log = "0.4.20"
+masync = { path = "../maybe-async-rs/masync" }
+fixed-map = "0.9.2"
+thiserror = "1.0.48"

@@ -30,3 +30,6 @@
 [submodule "fixed-map"]
 	path = fixed-map
 	url = https://github.com/planetoryd/fixed-map
+[submodule "maybe-async-rs"]
+	path = maybe-async-rs
+	url = https://github.com/planetoryd/maybe-async-rs
