@@ -33,3 +33,15 @@
 [submodule "maybe-async-rs"]
 	path = maybe-async-rs
 	url = https://github.com/planetoryd/maybe-async-rs
+[submodule "rumpsteak"]
+	path = rumpsteak
+	url = https://github.com/planetoryd/rumpsteak
+[submodule "netlink-ops"]
+	path = netlink-ops
+	url = https://github.com/planetoryd/netlink-ops
+[submodule "async-recursion"]
+	path = async-recursion
+	url = https://github.com/planetoryd/async-recursion
+[submodule "tokio-send-fd"]
+	path = tokio-send-fd
+	url = https://github.com/planetoryd/tokio-send-fd
