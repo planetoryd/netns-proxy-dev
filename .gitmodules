@@ -45,3 +45,6 @@
 [submodule "tokio-send-fd"]
 	path = tokio-send-fd
 	url = https://github.com/planetoryd/tokio-send-fd
+[submodule "pidfd"]
+	path = pidfd
+	url = https://github.com/planetoryd/pidfd
